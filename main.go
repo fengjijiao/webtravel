@@ -10,7 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"./transform"
+	"webtravel/transform"
+	"flag"
 )
 
 import _ "net/http/pprof"
@@ -18,8 +19,13 @@ import _ "net/http/pprof"
 var g_transform transform.Transform
 var SiteConfig = map[string]interface{}{}
 
+var (
+	config string
+	resLoc string
+)
+
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	home, err := template.ParseFiles("./template/home.html")
+	home, err := template.ParseFiles(resLoc+"template/home.html")
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +33,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RobotsHandler(w http.ResponseWriter, r *http.Request) {
-	robots, err := template.ParseFiles("./template/robots.txt")
+	robots, err := template.ParseFiles(resLoc+"template/robots.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +47,7 @@ func HookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "text/javascript")
 
-	hookjs, err := template.ParseFiles("./javascript/hook.js")
+	hookjs, err := template.ParseFiles(resLoc+"javascript/hook.js")
 	if err != nil {
 		panic(err)
 	}
@@ -111,7 +117,10 @@ func TravelHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	buffer, err := ioutil.ReadFile("./config/site.json")
+	flag.StringVar(&config, "config", "./config/site.json", "config file location")
+	flag.StringVar(&resLoc, "rl", "./", "resources file location")
+	flag.Parse()
+	buffer, err := ioutil.ReadFile(config)
 	if err != nil {
 		panic(err)
 	}
